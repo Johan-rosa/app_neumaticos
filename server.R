@@ -1,10 +1,8 @@
-
-
-
+# Servidor del app -----------------------------------------------------------------
 
 shinyServer(function(input, output) {
    
-  
+  #Filtrando la data en base al tipo de vehículo
   data <- reactive({
     
     if(input$tipo_vehiculo == "Todos"){
@@ -17,32 +15,34 @@ shinyServer(function(input, output) {
       
       data <- tbr_pcr1 %>%
         filter(tipo_vehiculo %in% input$tipo_vehiculo ) %>%
-        mutate(cuts = cut(valor_fob_unitario,
-                          breaks = seq(to = max(valor_fob_unitario), by = input$rango)))
+        mutate(cuts = cut(
+          valor_fob_unitario,
+          breaks = seq(to = max(valor_fob_unitario), by = input$rango))
+          )
     }
     
   })
   
-  
+
+  # Widget dependiente del tipo de vehículo  
   output$size <- renderUI({
     
-    selectInput(inputId = "size",
-                label = "Tamaño",
-                choices = sort(unique(data()$size_2)), 
-                multiple = T,
-                selectize = T, 
-                selected = data() %>%
-                  group_by(size_2) %>%
-                  summarise(cantidad = sum(cantidad)) %>%
-                  top_n(5) %>%
-                  #filter(cantidad > quantile(cantidad, 0.99)) %>%
-                  select(size_2) %>%
-                  table() %>%
-                  names())
+    selectInput(
+      inputId = "size",
+      label = "Tamaño",
+      choices = sort(unique(data()$size_2)),
+      multiple = T,
+      selectize = T, 
+      selected = data() %>%
+        group_by(size_2) %>%
+        summarise(cantidad = sum(cantidad)) %>%
+        top_n(5) %>%
+        select(size_2) %>%
+        table() %>%
+        names())
   })
   
-  
-  
+  # Lectura del archivo externo
   datos_externos <- reactive({
     
     validate(
@@ -81,10 +81,7 @@ shinyServer(function(input, output) {
              xaxis = list(title = ""),
              yaxis = list(title = "Unidades"),
              title = "")
-    
-    
-    
-  })
+    })
   
   output$plot3 <- renderPlot({
     
